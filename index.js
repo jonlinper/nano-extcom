@@ -3,6 +3,7 @@
 require('dotenv').config();
 var nano = require('./nano-client');
 var chat = require('./chat-client');
+var browser = require('./browser-client');
 
 var shutdown = function() {
   console.log('Shutdown ...');
@@ -13,9 +14,17 @@ var shutdown = function() {
 
 // Nano client
 nano.start(function(data) {
-  var params = data.split(': ');
+console.log(data);
+  if (/^http/.test(data)) {// Browser
+    browser.get(data, function(err, res) {
+      nano.send(err ? err : res);
+    });
+  }
+  else {// Chat
+    var params = data.split(': ');
 
-  chat.send(params[0], params[1]);
+    chat.send(params[0], params[1]);
+  }
 });
 
 // Chat client
